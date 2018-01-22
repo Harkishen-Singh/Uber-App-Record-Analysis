@@ -13,7 +13,7 @@ class Data_extraction_creation:
 
     def getting_source(self):
         client=MongoClient("mongodb://127.0.0.1:27017")
-        database=client['testing']
+        database=client['Uber_Database']
 
 
 
@@ -47,8 +47,10 @@ class Data_extraction_creation:
         search_length=len(self.search)
         c=0
         trip_number=0
-        day=input("Enter the date and day")
-        collection=database[day]
+        week=int(input("Enter the week number : "))
+        name_collection="week_"+str(week)
+        day=input("Enter the date and day : ")
+        collection=database[name_collection]
 
         day_last_left=0
         for i in range(0, len((self.file))-search_length): # counting individual trip of that day.
@@ -104,28 +106,42 @@ class Data_extraction_creation:
                                             pos_of_s2=pp
                                     trip_cash_collected=str(self.file[j+search_length2 +k+4: j+search_length2 +k+pos_of_s2])
 
-                                if count==6:
+                                    search3='class="layout__item four-fifths"'
+                                    l=len(search3)
+                                    pos_earnings=0
+                                    for pp in range(0,1000):
+                                        sear = self.file[j+k+pp: j+k+pp+l]
+                                        if sear == search3:
+                                            for ppp in range(1,500):
+                                                sear2=self.file[j+k+pp+ppp: j+k+pp+ppp+6]
+                                                if sear2 == "</div>":
+                                                    pos_earnings=j+k+pp+ppp
+                                                    break
+                                            self.trip_earnings=self.file[j+k+pp+l+6: pos_earnings]
+                                            break
 
-                                    break
+                        '''
                         print("day = "+ day)
                         print("trip_number"+ str(trip_number))
                         print("trip_km "+ trip_km)
                         print("trip_time = "+ trip_time)
                         print("trip_start = "+ trip_start)
                         print("trip_cash_collected = "+ trip_cash_collected)
+                        print("trip_earnings = "+ self.trip_earnings)
                         print("\n\n")
+                        '''
 
-                        print("\n Adding to the database.!")
+
                         db_array ={
-                            "Trip Number": trip_number,
+                            "Day":day,
+                            "Trip Number": str(trip_number),
                             "Trip Starting Time":trip_start,
                             "Trip Time":trip_time,
                             "Trip Distance":trip_km,
                             "Cash Collected":trip_cash_collected
                         }
                         collection.insert_one(db_array)
-                        print("\nAddition done")
-
+                print("Done..!")
                 break
 
 
