@@ -12,6 +12,11 @@ class Data_extraction_creation:
         self.search_length=0
 
     def getting_source(self):
+        client=MongoClient("mongodb://127.0.0.1:27017")
+        database=client['testing']
+
+
+
         self.file_name=input("Enter the name of the text file to read the source code :\n")
         self.file_name = self.file_name + ".txt"
         self.file_open=open(self.file_name, 'r')
@@ -42,18 +47,21 @@ class Data_extraction_creation:
         search_length=len(self.search)
         c=0
         trip_number=0
-        day=""
+        day=input("Enter the date and day")
+        collection=database[day]
+
+        day_last_left=0
         for i in range(0, len((self.file))-search_length): # counting individual trip of that day.
             substr = self.file[i:i+search_length]
 
             if self.search == substr:
                 c = c + 1 # day count
-                day = self.file[i+search_length+2:i+search_length+13]
+                #day = self.file[i+search_length+2:i+search_length+13]
                 search2="trip-table__row"
                 search_length2=len(search2)
 
                 m=0
-                for j in range(0, len((self.file))-search_length2):
+                for j in range(day_last_left, len((self.file))-search_length2):
 
                     substr2 = self.file[j:j+search_length2]
                     if substr2 == search2:
@@ -97,6 +105,7 @@ class Data_extraction_creation:
                                     trip_cash_collected=str(self.file[j+search_length2 +k+4: j+search_length2 +k+pos_of_s2])
 
                                 if count==6:
+
                                     break
                         print("day = "+ day)
                         print("trip_number"+ str(trip_number))
@@ -106,7 +115,18 @@ class Data_extraction_creation:
                         print("trip_cash_collected = "+ trip_cash_collected)
                         print("\n\n")
 
+                        print("\n Adding to the database.!")
+                        db_array ={
+                            "Trip Number": trip_number,
+                            "Trip Starting Time":trip_start,
+                            "Trip Time":trip_time,
+                            "Trip Distance":trip_km,
+                            "Cash Collected":trip_cash_collected
+                        }
+                        collection.insert_one(db_array)
+                        print("\nAddition done")
 
+                break
 
 
 
